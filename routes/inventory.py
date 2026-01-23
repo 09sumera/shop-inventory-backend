@@ -3,7 +3,7 @@ from models.product import Product
 
 inventory_bp = Blueprint("inventory", __name__)
 
-# ✅ helper to get Mongo collection from app.py
+# ================= HELPER =================
 def products_collection():
     return current_app.config["PRODUCTS_COLLECTION"]
 
@@ -55,12 +55,13 @@ def sell_product():
     if not product:
         return jsonify({"error": "Product not found"}), 404
 
-    if product["qty"] < int(data.get("qty", 0)):
+    qty = int(data.get("qty", 0))
+    if product["qty"] < qty:
         return jsonify({"error": "Insufficient stock"}), 400
 
     products.update_one(
         {"id": data.get("id")},
-        {"$inc": {"qty": -int(data.get("qty"))}}
+        {"$inc": {"qty": -qty}}
     )
 
     return jsonify({"message": "Product sold successfully"})

@@ -3,38 +3,35 @@ from flask_cors import CORS
 from pymongo import MongoClient
 import os
 
+from routes.inventory import inventory_bp
+
+# ---------------- CREATE APP ----------------
 app = Flask(__name__)
 CORS(app)
 
-# ✅ MongoDB Atlas (from Render ENV)
+# ---------------- MONGODB CONNECTION ----------------
+# Works both locally and on Render
 MONGO_URI = os.environ.get("MONGO_URI")
-client = MongoClient(MONGO_URI)
 
+# 🔹 Local fallback (safe for development)
+if not MONGO_URI:
+    MONGO_URI = "mongodb+srv://Sumera:Sumera0904@cluster0.n6amxue.mongodb.net/inventory_db"
+
+client = MongoClient(MONGO_URI)
 db = client["inventory_db"]
 products = db["products"]
 
-# ✅ make products available to blueprints
+# 🔑 Share Mongo collection with blueprints
 app.config["PRODUCTS_COLLECTION"] = products
 
-# register routes AFTER db setup
-from routes.inventory import inventory_bp
+# ---------------- REGISTER BLUEPRINT ----------------
 app.register_blueprint(inventory_bp)
 
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return jsonify({"status": "Backend running"})
 
-@app.route("/stats")
-def stats():
-    all_products = list(products.find({}, {"_id": 0}))
-
-    return jsonify({
-        "totalProducts": len(all_products),
-        "totalQuantity": sum(p.get("qty", 0) for p in all_products),
-        "lowStock": len([p for p in all_products if p.get("qty", 0) < 10]),
-        "inventoryValue": sum(p.get("qty", 0) * p.get("price", 0) for p in all_products),
-        "products": all_products
-    })
-
+# ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
