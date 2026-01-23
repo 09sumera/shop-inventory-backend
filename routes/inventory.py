@@ -1,13 +1,11 @@
-from flask import Blueprint, request, jsonify
-from pymongo import MongoClient
+from flask import Blueprint, request, jsonify, current_app
 from models.product import Product
 
 inventory_bp = Blueprint("inventory", __name__)
 
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["inventory_db"]
-products = db["products"]
+# ✅ helper to get Mongo collection from app.py
+def products_collection():
+    return current_app.config["PRODUCTS_COLLECTION"]
 
 # ---------------- ADD PRODUCT ----------------
 @inventory_bp.route("/add", methods=["POST"])
@@ -19,6 +17,7 @@ def add_product():
         if not valid:
             return jsonify({"error": error}), 400
 
+        products = products_collection()
         existing = products.find_one({"id": product.id})
 
         if existing:
@@ -30,6 +29,7 @@ def add_product():
         else:
             products.insert_one(product.to_dict())
             return jsonify({"message": "Product added"})
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -37,7 +37,8 @@ def add_product():
 # ---------------- GET ALL PRODUCTS ----------------
 @inventory_bp.route("/products", methods=["GET"])
 def get_products():
-    return jsonify(list(products.find({}, {"_id": 0})))
+    products = list(products_collection().find({}, {"_id": 0}))
+    return jsonify(products)
 
 
 # ---------------- SELL PRODUCT ----------------
@@ -47,12 +48,14 @@ def sell_product():
         return jsonify({"status": "ok"}), 200
 
     data = request.json
+    products = products_collection()
+
     product = products.find_one({"id": data.get("id")})
 
     if not product:
         return jsonify({"error": "Product not found"}), 404
 
-    if product["qty"] < data.get("qty"):
+    if product["qty"] < int(data.get("qty", 0)):
         return jsonify({"error": "Insufficient stock"}), 400
 
     products.update_one(
@@ -67,6 +70,7 @@ def sell_product():
 @inventory_bp.route("/restock", methods=["POST"])
 def restock_product():
     data = request.json
+    products = products_collection()
 
     products.update_one(
         {"id": data.get("id")},
@@ -79,22 +83,18 @@ def restock_product():
 # ---------------- DELETE PRODUCT ----------------
 @inventory_bp.route("/delete/<int:pid>", methods=["DELETE"])
 def delete_product(pid):
-    products.delete_one({"id": pid})
+    products_collection().delete_one({"id": pid})
     return jsonify({"message": "Product deleted"})
 
 
 # ---------------- DASHBOARD STATS ----------------
 @inventory_bp.route("/stats", methods=["GET"])
 def inventory_stats():
-    all_products = list(products.find({}, {"_id": 0}))
-
-    total_products = len(all_products)
-    total_quantity = sum(p["qty"] for p in all_products)
-    low_stock = len([p for p in all_products if p["qty"] < 5])
+    products = list(products_collection().find({}, {"_id": 0}))
 
     return jsonify({
-        "totalProducts": total_products,
-        "totalQuantity": total_quantity,
-        "lowStock": low_stock,
-        "products": all_products
+        "totalProducts": len(products),
+        "totalQuantity": sum(p.get("qty", 0) for p in products),
+        "lowStock": len([p for p in products if p.get("qty", 0) < 5]),
+        "products": products
     })
