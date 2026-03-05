@@ -4,6 +4,7 @@ function animateValue(id, start, end, duration) {
 
     function step(timestamp) {
         if (!startTimestamp) startTimestamp = timestamp;
+
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         element.innerText = Math.floor(progress * (end - start) + start);
 
@@ -15,18 +16,17 @@ function animateValue(id, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-fetch("http://127.0.0.1:5000/stats")
+fetch("/stats")
     .then(res => res.json())
     .then(data => {
+
+        // KPI ANIMATION
         animateValue("totalProducts", 0, data.totalProducts, 800);
         animateValue("totalQuantity", 0, data.totalQuantity, 900);
         animateValue("lowStock", 0, data.lowStock, 800);
         animateValue("inventoryValue", 0, data.inventoryValue, 1000);
-    });
-// INVENTORY HEALTH STATUS
-fetch("http://127.0.0.1:5000/stats")
-    .then(res => res.json())
-    .then(data => {
+
+        // INVENTORY HEALTH STATUS
         const lowStock = data.lowStock;
 
         const statusBox = document.getElementById("healthStatus");
@@ -48,4 +48,8 @@ fetch("http://127.0.0.1:5000/stats")
             text.innerText = "Critical";
             icon.style.color = "#dc2626";
         }
+
+    })
+    .catch(err => {
+        console.log("Failed to load KPI data", err);
     });

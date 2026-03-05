@@ -27,10 +27,14 @@
                 window.location.href = "/";
             } else {
                 document.body.style.display = "block";
+
+                // 🔄 Load KPI data after page is visible
+                if (typeof loadKPI === "function") {
+                    loadKPI();
+                }
             }
         })();
     </script>
-
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="brand">
