@@ -1,7 +1,7 @@
 function addProduct() {
-    fetch("http://127.0.0.1:5000/add", {
+    fetch("/add", {
         method: "POST",
-        credentials: "include",   // 🔥 IMPORTANT
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             id: 1,
@@ -10,19 +10,19 @@ function addProduct() {
             qty: 10
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-        loadProducts();
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadProducts();
+        });
 }
 
 
 function loadProducts() {
-    fetch("http://127.0.0.1:5000/products")
+    fetch("/products")
         .then(res => res.json())
         .then(data => {
             const table = document.getElementById("productTable");
@@ -47,52 +47,52 @@ function loadProducts() {
 
 
 function sellProduct(id) {
-    fetch("http://127.0.0.1:5000/sell", {
+    fetch("/sell", {
         method: "POST",
-        credentials: "include",   // 🔥 IMPORTANT
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id, qty: 1 })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-        loadProducts();
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadProducts();
+        });
 }
 
 
 function restockProduct(id) {
-    fetch("http://127.0.0.1:5000/restock", {
+    fetch("/restock", {
         method: "POST",
-        credentials: "include",   // 🔥 IMPORTANT
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id, qty: 5 })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-        loadProducts();
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadProducts();
+        });
 }
 
 
 function deleteProduct(id) {
-    fetch(`http://127.0.0.1:5000/delete/${id}`, {
+    fetch(`/delete/${id}`, {
         method: "DELETE",
-        credentials: "include"   // 🔥 IMPORTANT
+        credentials: "include"
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-        loadProducts();
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            loadProducts();
+        });
 }

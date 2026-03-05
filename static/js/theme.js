@@ -1,4 +1,3 @@
-
 // Apply saved theme
 (function () {
     const theme = localStorage.getItem("theme");
@@ -20,11 +19,17 @@ function toggleDarkMode() {
 
 // Active sidebar link
 document.addEventListener("DOMContentLoaded", () => {
-    const page = window.location.pathname.split("/").pop();
+
+    const currentPath = window.location.pathname;
 
     document.querySelectorAll(".sidebar a").forEach(link => {
-        if (link.getAttribute("href") === page) {
+
+        const linkPath = link.getAttribute("href");
+
+        if (linkPath && currentPath.includes(linkPath)) {
             link.classList.add("active");
         }
+
     });
+
 });

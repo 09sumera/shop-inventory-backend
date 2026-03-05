@@ -1,4 +1,4 @@
-fetch("http://127.0.0.1:5000/stats")
+fetch("/stats")
     .then(res => res.json())
     .then(data => {
         const labels = data.products.map(p => p.name);
@@ -8,7 +8,7 @@ fetch("http://127.0.0.1:5000/stats")
         new Chart(document.getElementById("miniBar"), {
             type: "bar",
             data: {
-                labels,
+                labels: labels,
                 datasets: [{
                     data: qty,
                     backgroundColor: "#7c6ee6",
@@ -25,7 +25,7 @@ fetch("http://127.0.0.1:5000/stats")
         new Chart(document.getElementById("miniPie"), {
             type: "doughnut",
             data: {
-                labels,
+                labels: labels,
                 datasets: [{
                     data: qty,
                     backgroundColor: [
@@ -41,4 +41,7 @@ fetch("http://127.0.0.1:5000/stats")
                 maintainAspectRatio: false
             }
         });
+    })
+    .catch(err => {
+        console.log("Failed to load dashboard charts", err);
     });
