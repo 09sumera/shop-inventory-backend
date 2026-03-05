@@ -1,4 +1,4 @@
-fetch("http://127.0.0.1:5000/stats")
+fetch("/stats")
     .then(res => res.json())
     .then(data => {
         console.log("Dashboard data:", data);
