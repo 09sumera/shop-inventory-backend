@@ -6,8 +6,13 @@
 
     <!-- MOBILE RESPONSIVE -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -85,8 +90,10 @@
                     <th>Name</th>
                     <th>Price</th>
                     <th>Quantity</th>
+                    <th>Action</th>
                 </tr>
             </thead>
+
             <tbody id="productTable"></tbody>
         </table>
     </div>
@@ -112,27 +119,52 @@
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 
     <script>
-        // Load products
+
         fetch("/products", {
             credentials: "include"
         })
             .then(res => res.json())
             .then(data => {
+
                 const table = document.getElementById("productTable");
                 table.innerHTML = "";
 
                 data.forEach(p => {
+
                     table.innerHTML += `
-                <tr>
-                    <td>${p.id}</td>
-                    <td>${p.name}</td>
-                    <td>${p.price}</td>
-                    <td>${p.qty}</td>
-                </tr>`;
+        <tr>
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.price}</td>
+            <td>${p.qty}</td>
+            <td>
+                <button onclick="deleteProduct(${p.id})">
+                    Delete
+                </button>
+            </td>
+        </tr>`;
+
                 });
+
             });
 
-        // Logout
+
+        function deleteProduct(id) {
+
+            if (!confirm("Delete this product?")) return;
+
+            fetch(`/delete/${id}`, {
+                method: "DELETE",
+                credentials: "include"
+            })
+                .then(res => res.json())
+                .then(() => {
+                    location.reload();
+                });
+
+        }
+
+
         function logout() {
             fetch("/logout", {
                 method: "POST",
@@ -141,6 +173,7 @@
                 window.location.href = "/";
             });
         }
+
     </script>
 
 </body>
